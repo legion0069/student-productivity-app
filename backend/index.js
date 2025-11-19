@@ -1,27 +1,61 @@
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+const DATA_FILE = path.join(__dirname, "data", "tasks.json");
 
 app.use(cors());
 app.use(express.json());
 
-// In-memory tasks store
+// Helper: load tasks from file (sync at startup)
 let tasks = [];
 let nextId = 1;
+try {
+  const raw = fs.readFileSync(DATA_FILE, "utf8");
+  const parsed = JSON.parse(raw);
+  if (Array.isArray(parsed)) {
+    tasks = parsed;
+    // set nextId to max id + 1
+    const maxId = tasks.reduce((m, t) => (t.id && t.id > m ? t.id : m), 0);
+    nextId = maxId + 1;
+  } else {
+    tasks = [];
+  }
+} catch (err) {
+  // If file not present or invalid, start empty and create file
+  tasks = [];
+  try {
+    fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
+    fs.writeFileSync(DATA_FILE, JSON.stringify(tasks, null, 2), "utf8");
+  } catch (e) {
+    console.error("Failed to create data file:", e);
+  }
+}
+
+// Helper: persist tasks to file (async)
+async function saveTasks() {
+  try {
+    await fs.promises.writeFile(DATA_FILE, JSON.stringify(tasks, null, 2), "utf8");
+  } catch (err) {
+    console.error("Failed to save tasks:", err);
+  }
+}
 
 // Root health check
 app.get("/", (req, res) => {
   res.send("Backend is running...");
 });
 
-// GET /tasks - return all tasks
+// GET /tasks
 app.get("/tasks", (req, res) => {
   res.json(tasks);
 });
 
-// POST /tasks - create a new task
-app.post("/tasks", (req, res) => {
+// POST /tasks
+app.post("/tasks", async (req, res) => {
   const { title, description, dueDate } = req.body;
   if (!title || !title.trim()) {
     return res.status(400).json({ error: "Title is required" });
@@ -35,22 +69,35 @@ app.post("/tasks", (req, res) => {
     createdAt: new Date().toISOString()
   };
   tasks.unshift(task); // newest first
+  await saveTasks();
   res.status(201).json(task);
 });
 
-// PUT /tasks/:id/toggle - toggle completed
-app.put("/tasks/:id/toggle", (req, res) => {
+// PUT /tasks/:id/toggle
+app.put("/tasks/:id/toggle", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const task = tasks.find(t => t.id === id);
   if (!task) return res.status(404).json({ error: "Task not found" });
   task.completed = !task.completed;
+  await saveTasks();
   res.json(task);
 });
 
+// DELETE /tasks/:id
+app.delete("/tasks/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const idx = tasks.findIndex(t => t.id === id);
+  if (idx === -1) return res.status(404).json({ error: "Task not found" });
+  const [deleted] = tasks.splice(idx, 1);
+  await saveTasks();
+  res.json({ ok: true, deleted });
+});
+
 // Dev helper to reset tasks (optional)
-app.post("/_reset", (req, res) => {
+app.post("/_reset", async (req, res) => {
   tasks = [];
   nextId = 1;
+  await saveTasks();
   res.json({ ok: true });
 });
 
