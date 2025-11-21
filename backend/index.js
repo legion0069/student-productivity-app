@@ -18,6 +18,11 @@ try {
   const parsed = JSON.parse(raw);
   if (Array.isArray(parsed)) {
     tasks = parsed;
+    // ensure priority field exists
+    tasks = tasks.map(t => ({
+      ...t,
+      priority: t.priority || "normal"
+    }));
     // set nextId to max id + 1
     const maxId = tasks.reduce((m, t) => (t.id && t.id > m ? t.id : m), 0);
     nextId = maxId + 1;
@@ -25,7 +30,6 @@ try {
     tasks = [];
   }
 } catch (err) {
-  // If file not present or invalid, start empty and create file
   tasks = [];
   try {
     fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
@@ -38,7 +42,11 @@ try {
 // Helper: persist tasks to file (async)
 async function saveTasks() {
   try {
-    await fs.promises.writeFile(DATA_FILE, JSON.stringify(tasks, null, 2), "utf8");
+    await fs.promises.writeFile(
+      DATA_FILE,
+      JSON.stringify(tasks, null, 2),
+      "utf8"
+    );
   } catch (err) {
     console.error("Failed to save tasks:", err);
   }
@@ -56,7 +64,7 @@ app.get("/tasks", (req, res) => {
 
 // POST /tasks
 app.post("/tasks", async (req, res) => {
-  const { title, description, dueDate } = req.body;
+  const { title, description, dueDate, priority } = req.body;
   if (!title || !title.trim()) {
     return res.status(400).json({ error: "Title is required" });
   }
@@ -66,11 +74,36 @@ app.post("/tasks", async (req, res) => {
     description: description ? description.trim() : "",
     dueDate: dueDate || null,
     completed: false,
+    priority: priority || "normal",
     createdAt: new Date().toISOString()
   };
-  tasks.unshift(task); // newest first
+  tasks.unshift(task);
   await saveTasks();
   res.status(201).json(task);
+});
+
+// PUT /tasks/:id - edit task (title / description / priority)
+app.put("/tasks/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { title, description, priority } = req.body;
+  const task = tasks.find(t => t.id === id);
+  if (!task) return res.status(404).json({ error: "Task not found" });
+
+  if (title !== undefined) {
+    if (!title.trim()) {
+      return res.status(400).json({ error: "Title cannot be empty" });
+    }
+    task.title = title.trim();
+  }
+  if (description !== undefined) {
+    task.description = description ? description.trim() : "";
+  }
+  if (priority !== undefined) {
+    task.priority = priority || "normal";
+  }
+
+  await saveTasks();
+  res.json(task);
 });
 
 // PUT /tasks/:id/toggle
@@ -93,7 +126,6 @@ app.delete("/tasks/:id", async (req, res) => {
   res.json({ ok: true, deleted });
 });
 
-// Dev helper to reset tasks (optional)
 app.post("/_reset", async (req, res) => {
   tasks = [];
   nextId = 1;
