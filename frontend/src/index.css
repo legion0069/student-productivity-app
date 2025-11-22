@@ -206,3 +206,41 @@ h1 {
   background: #2563eb;
   color: white;
 }
+.stats-card {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.stats-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 80px;
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #64748b;
+}
