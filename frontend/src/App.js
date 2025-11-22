@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
 import EditTaskForm from "./components/EditTaskForm";
+import TaskStats from "./components/TaskStats";
+
 
 const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
@@ -145,6 +147,7 @@ function App() {
       </div>
 
       <TaskInput onAdd={addTask} />
+      <TaskStats tasks={filteredTasks} />
 
       {editingTask && (
         <EditTaskForm
