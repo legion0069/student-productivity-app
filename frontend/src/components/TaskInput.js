@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 export default function TaskInput({ onAdd }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const titleRef = useRef(null);
 
   useEffect(() => {
@@ -15,9 +16,14 @@ export default function TaskInput({ onAdd }) {
       alert("Title is required");
       return;
     }
-    await onAdd({ title: title.trim(), description: description.trim() });
+    await onAdd({
+      title: title.trim(),
+      description: description.trim(),
+      dueDate: dueDate || null
+    });
     setTitle("");
     setDescription("");
+    setDueDate("");
     if (titleRef.current) titleRef.current.focus();
   };
 
@@ -35,6 +41,13 @@ export default function TaskInput({ onAdd }) {
         placeholder="Description (optional)"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+      />
+      <input
+        className="input date-input"
+        type="date"
+        value={dueDate || ""}
+        onChange={(e) => setDueDate(e.target.value)}
+        title="Due date (optional)"
       />
       <button className="btn primary" type="submit" disabled={!title.trim()}>
         Add
