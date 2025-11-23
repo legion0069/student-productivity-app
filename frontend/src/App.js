@@ -12,6 +12,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [editingTask, setEditingTask] = useState(null);
   const [filter, setFilter] = useState("all"); // all | active | completed
+  const [sort, setSort] = useState("created-desc"); // created-desc | created-asc | due-asc | due-desc | priority
 
   const loadTasks = async () => {
     try {
@@ -114,11 +115,41 @@ function App() {
     setEditingTask(null);
   };
 
-  const filteredTasks = tasks.filter(t => {
+  const filteredTasks = tasks
+  .filter(t => {
     if (filter === "active") return !t.completed;
     if (filter === "completed") return t.completed;
     return true;
+  })
+  .slice() // copy array before sorting
+  .sort((a, b) => {
+    if (sort === "created-desc") {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+    if (sort === "created-asc") {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    }
+    if (sort === "due-asc") {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate) - new Date(b.dueDate);
+    }
+    if (sort === "due-desc") {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(b.dueDate) - new Date(a.dueDate);
+    }
+    if (sort === "priority") {
+      const order = { high: 0, normal: 1, low: 2 };
+      const pa = order[a.priority || "normal"];
+      const pb = order[b.priority || "normal"];
+      return pa - pb;
+    }
+    return 0;
   });
+
 
   return (
     <div style={{ maxWidth: 900, margin: "32px auto", padding: 16 }} className="app">
@@ -168,7 +199,25 @@ function App() {
         />
       )}
     </div>
+  {/* Sort options */}
+    <div style={{ marginBottom: 12 }}>
+      <span style={{ marginRight: 8, fontSize: 14 }}>Sort by:</span>
+      <select
+        className="input"
+        style={{ width: 200, padding: "6px 8px" }}
+        value={sort}
+        onChange={(e) => setSort(e.target.value)}
+      >
+        <option value="created-desc">Created: Newest first</option>
+        <option value="created-asc">Created: Oldest first</option>
+        <option value="due-asc">Due date: Soonest first</option>
+        <option value="due-desc">Due date: Latest first</option>
+        <option value="priority">Priority: High → Low</option>
+      </select>
+    </div>
+
   );
+  
 }
 
 export default App;
