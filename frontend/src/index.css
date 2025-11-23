@@ -244,3 +244,14 @@ h1 {
   font-size: 13px;
   color: #64748b;
 }
+.task-item.overdue:not(.completed) {
+  border-left: 4px solid #ef4444;
+}
+
+.due-overdue {
+  color: #b91c1c;
+  font-weight: 600;
+}
+.date-input {
+  width: 150px;
+}
