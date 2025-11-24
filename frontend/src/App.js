@@ -3,6 +3,7 @@ import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
 import EditTaskForm from "./components/EditTaskForm";
 import TaskStats from "./components/TaskStats";
+import AppHeader from "./components/AppHeader";
 
 
 const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
@@ -150,73 +151,91 @@ function App() {
     return 0;
   });
 
+return (
+  <div className="app-shell">
+    <AppHeader />
 
-  return (
-    <div style={{ maxWidth: 900, margin: "32px auto", padding: 16 }} className="app">
-      <h1>Student Productivity App</h1>
+    <main className="app-main">
+      {/* Top toolbar: filters + sort */}
+      <section className="app-section toolbar-section">
+        <div className="toolbar-row">
+          <div className="filters-group">
+            <button
+              className={`btn filter-btn ${filter === "all" ? "active" : ""}`}
+              onClick={() => setFilter("all")}
+            >
+              All
+            </button>
+            <button
+              className={`btn filter-btn ${filter === "active" ? "active" : ""}`}
+              onClick={() => setFilter("active")}
+            >
+              Active
+            </button>
+            <button
+              className={`btn filter-btn ${filter === "completed" ? "active" : ""}`}
+              onClick={() => setFilter("completed")}
+            >
+              Completed
+            </button>
+          </div>
 
-      {/* Filters */}
-      <div style={{ marginBottom: 12 }}>
-        <button
-          className={`btn filter-btn ${filter === "all" ? "active" : ""}`}
-          onClick={() => setFilter("all")}
-        >
-          All
-        </button>
-        <button
-          className={`btn filter-btn ${filter === "active" ? "active" : ""}`}
-          onClick={() => setFilter("active")}
-        >
-          Active
-        </button>
-        <button
-          className={`btn filter-btn ${filter === "completed" ? "active" : ""}`}
-          onClick={() => setFilter("completed")}
-        >
-          Completed
-        </button>
-      </div>
+          <div className="sort-group">
+            <span className="sort-label">Sort by:</span>
+            <select
+              className="input sort-select"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+            >
+              <option value="created-desc">Created: Newest first</option>
+              <option value="created-asc">Created: Oldest first</option>
+              <option value="due-asc">Due date: Soonest first</option>
+              <option value="due-desc">Due date: Latest first</option>
+              <option value="priority">Priority: High → Low</option>
+            </select>
+          </div>
+        </div>
+      </section>
 
-      <TaskInput onAdd={addTask} />
-      <TaskStats tasks={filteredTasks} />
+      {/* Form + stats */}
+      <section className="app-section">
+        <TaskInput onAdd={addTask} />
+        <TaskStats tasks={filteredTasks} />
+      </section>
 
+      {/* Edit form */}
       {editingTask && (
-        <EditTaskForm
-          task={editingTask}
-          onSave={saveEdit}
-          onCancel={cancelEdit}
-        />
+        <section className="app-section">
+          <EditTaskForm
+            task={editingTask}
+            onSave={saveEdit}
+            onCancel={cancelEdit}
+          />
+        </section>
       )}
 
-      {loading ? (
-        <p>Loading tasks...</p>
-      ) : (
-        <TaskList
-          tasks={filteredTasks}
-          onToggle={toggleTask}
-          onDelete={deleteTask}
-          onEdit={handleEditClick}
-        />
-      )}
-    </div>
-  {/* Sort options */}
-    <div style={{ marginBottom: 12 }}>
-      <span style={{ marginRight: 8, fontSize: 14 }}>Sort by:</span>
-      <select
-        className="input"
-        style={{ width: 200, padding: "6px 8px" }}
-        value={sort}
-        onChange={(e) => setSort(e.target.value)}
-      >
-        <option value="created-desc">Created: Newest first</option>
-        <option value="created-asc">Created: Oldest first</option>
-        <option value="due-asc">Due date: Soonest first</option>
-        <option value="due-desc">Due date: Latest first</option>
-        <option value="priority">Priority: High → Low</option>
-      </select>
-    </div>
+      {/* Task list */}
+      <section className="app-section">
+        {loading ? (
+          <p>Loading tasks...</p>
+        ) : (
+          <TaskList
+            tasks={filteredTasks}
+            onToggle={toggleTask}
+            onDelete={deleteTask}
+            onEdit={handleEditClick}
+          />
+        )}
+      </section>
+    </main>
 
-  );
+    <footer className="app-footer">
+      <span>Built as part of a 100 Days of Code journey.</span>
+    </footer>
+  </div>
+);
+
+  
   
 }
 
