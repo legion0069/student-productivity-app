@@ -1,10 +1,47 @@
 [
   {
+    "id": 5,
+    "title": "day 9",
+    "description": "",
+    "dueDate": null,
+    "completed": true,
+    "priority": "high",
+    "createdAt": "2025-11-25T18:04:09.443Z"
+  },
+  {
+    "id": 4,
+    "title": "day 7 2nd half",
+    "description": "",
+    "dueDate": null,
+    "completed": true,
+    "priority": "high",
+    "createdAt": "2025-11-23T18:11:09.978Z"
+  },
+  {
+    "id": 3,
+    "title": "day 7",
+    "description": "",
+    "dueDate": "2025-11-23",
+    "completed": true,
+    "priority": "normal",
+    "createdAt": "2025-11-23T18:10:58.885Z"
+  },
+  {
+    "id": 2,
+    "title": "day 6",
+    "description": "tracking progress",
+    "dueDate": null,
+    "completed": true,
+    "priority": "normal",
+    "createdAt": "2025-11-22T13:24:39.018Z"
+  },
+  {
     "id": 1,
     "title": "github",
     "description": "contributions streak",
     "dueDate": null,
-    "completed": false,
-    "createdAt": "2025-11-19T19:27:45.729Z"
+    "completed": true,
+    "createdAt": "2025-11-19T19:27:45.729Z",
+    "priority": "normal"
   }
 ]
