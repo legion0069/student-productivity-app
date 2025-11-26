@@ -21,10 +21,32 @@ app.use(express.json());
 // Initialize in-memory store from file
 initStore();
 
-// Root health check
-app.get("/", (req, res) => {
-  res.send("Backend is running...");
+// Detailed health/status endpoint
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    environment: process.env.NODE_ENV || "development",
+    port: Number(process.env.PORT) || 5000,
+    timestamp: new Date().toISOString()
+  });
 });
+
+// Task statistics endpoint
+app.get("/stats", (req, res) => {
+  const tasks = getAllTasks();
+  const total = tasks.length;
+  const completed = tasks.filter(t => t.completed).length;
+  const pending = total - completed;
+  const completion = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+  res.json({
+    total,
+    completed,
+    pending,
+    completionPercentage: completion
+  });
+});
+
 
 // GET /tasks
 app.get("/tasks", (req, res) => {
