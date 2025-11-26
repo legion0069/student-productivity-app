@@ -21,6 +21,11 @@ app.use(express.json());
 // Initialize in-memory store from file
 initStore();
 
+// Root health check
+app.get("/", (req, res) => {
+  res.send("Backend is running...");
+});
+
 // Detailed health/status endpoint
 app.get("/health", (req, res) => {
   res.json({
@@ -47,9 +52,6 @@ app.get("/stats", (req, res) => {
   });
 });
 
-res.status(500).json({ error: "Failed to create task" });
-
-
 // GET /tasks
 app.get("/tasks", (req, res) => {
   const tasks = getAllTasks();
@@ -66,7 +68,7 @@ app.post("/tasks", async (req, res) => {
     const task = await createTask({ title, description, dueDate, priority });
     res.status(201).json(task);
   } catch (err) {
-    console.error(err);
+    console.error("Error creating task:", err);
     res.status(500).json({ error: "Failed to create task" });
   }
 });
@@ -85,7 +87,7 @@ app.put("/tasks/:id", async (req, res) => {
     if (err.message === "Title cannot be empty") {
       return res.status(400).json({ error: err.message });
     }
-    console.error(err);
+    console.error("Error updating task:", err);
     res.status(500).json({ error: "Failed to update task" });
   }
 });
@@ -100,7 +102,7 @@ app.put("/tasks/:id/toggle", async (req, res) => {
     }
     res.json(task);
   } catch (err) {
-    console.error(err);
+    console.error("Error toggling task:", err);
     res.status(500).json({ error: "Failed to toggle task" });
   }
 });
@@ -115,7 +117,7 @@ app.delete("/tasks/:id", async (req, res) => {
     }
     res.json({ ok: true, deleted });
   } catch (err) {
-    console.error(err);
+    console.error("Error deleting task:", err);
     res.status(500).json({ error: "Failed to delete task" });
   }
 });
@@ -126,7 +128,7 @@ app.post("/_reset", async (req, res) => {
     await resetStore();
     res.json({ ok: true });
   } catch (err) {
-    console.error(err);
+    console.error("Error resetting store:", err);
     res.status(500).json({ error: "Failed to reset" });
   }
 });
